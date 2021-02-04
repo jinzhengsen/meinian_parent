@@ -1,0 +1,10 @@
+# Project exclude paths
+/meinian_common/target/
+/meinian_dao/target/
+/meinian_interface/target/
+/meinian_jobs/target/
+/meinian_mobile_web/target/
+/meinian_pojo/target/
+/meinian_service/target/
+/meinian_web/target/
+/quartz_demo/target/

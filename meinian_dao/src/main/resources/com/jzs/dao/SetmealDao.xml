@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzs.dao.SetmealDao">
+
+   <!-- void add(Setmeal setmeal);-->
+    <insert id="add" parameterType="setmeal" useGeneratedKeys="true" keyProperty="id">
+        insert into t_setmeal(code,name,helpCode,sex,age,price,remark,attention,img)
+        values (#{code},#{name},#{helpCode},#{sex},#{age},#{price},#{remark},#{attention},#{img})
+    </insert>
+
+    <!--void setSetmealAndTravelGroup(Map<String, Integer> map);-->
+    <insert id="setSetmealAndTravelGroup">
+        insert into t_setmeal_travelgroup(setmeal_id,travelgroup_id) values (#{setmealId},#{travelgroupId})
+    </insert>
+
+    <!--Page<Setmeal> findPage(String queryString);-->
+    <select id="findPage" parameterType="string" resultType="setmeal">
+        select * from t_setmeal
+        <where>
+            <if test="value!=null and value.length>0">
+                code=#{value} or name like concat('%',#{value},'%') or helpCode=#{value}
+            </if>
+        </where>
+    </select>
+
+    <!--void deleteSetMealGroup(Integer id);-->
+    <delete id="deleteSetMealGroup" parameterType="int">
+        delete from t_setmeal_travelgroup where setmeal_id=#{id}
+    </delete>
+
+<!--
+    void delete(Integer id);
+-->
+    <delete id="delete" parameterType="int">
+        delete from t_setmeal where id=#{id}
+    </delete>
+
+<!--
+    Setmeal findSetmealById(Integer id);
+-->
+    <select id="findSetmealById" parameterType="int" resultType="setmeal">
+        select * from t_setmeal where id=#{id}
+    </select>
+
+<!--
+    List<Integer> findGroupIds(Integer id);
+-->
+    <select id="findGroupIds" parameterType="int" resultType="java.lang.Integer">
+        select travelgroup_id from t_setmeal_travelgroup where setmeal_id=#{id}
+     </select>
+
+<!--
+    void edit(Setmeal setmeal);
+-->
+    <update id="edit" parameterType="setmeal">
+        update t_setmeal
+        <set>
+            <if test="name!=null">name=#{name},</if>
+            <if test="code!=null">code=#{code},</if>
+            <if test="helpCode!=null">helpCode=#{helpCode},</if>
+            <if test="sex!=null">sex=#{sex},</if>
+            <if test="age!=null">age=#{age},</if>
+            <if test="price!=null">price=#{price},</if>
+            <if test="remark!=null">remark=#{remark},</if>
+            <if test="attention!=null">attention=#{attention},</if>
+            <if test="img!=null">img=#{img}</if>
+        </set>
+        where  id=#{id}
+    </update>
+
+<!--
+    List<Setmeal> findAll();
+-->
+    <select id="findAll" resultType="setmeal">
+        select * from t_setmeal
+    </select>
+
+<!--
+    void deleteSetmealGroupById(Integer id);
+-->
+    <delete id="deleteSetmealGroupById" parameterType="int">
+        delete from t_setmeal_travelgroup where setmeal_id=#{id}
+    </delete>
+
+    <resultMap id="findByIdResultMap" type="setmeal">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="price" property="price"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+        <result column="img" property="img"/>
+        <collection property="travelGroups" column="id" select="com.jzs.dao.TravelGroupDao.findTravelGroupListById">
+        </collection>
+
+    </resultMap>
+    
+<!--
+查询具体套餐信息
+    Setmeal findById(Integer id);
+-->
+    <select id="findById" resultMap="findByIdResultMap" parameterType="int">
+        select * from t_setmeal where id=#{id};
+    </select>
+
+<!--
+    Setmeal getSetmealById(Integer id);
+-->
+    <select id="getSetmealById" resultType="setmeal">
+        select * from t_setmeal where id=#{id}
+    </select>
+
+<!--
+    查询套餐列表数据，画出饼状图
+    List<Map<String, Object>> findSetmealCount();
+-->
+    <select id="findSetmealCount" resultType="map">
+        select s.name name,count(s.id) value
+        from t_setmeal s,t_order o where s.id = o.setmeal_id
+        group BY s.name
+    </select>
+
+</mapper>

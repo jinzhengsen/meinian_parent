@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzs.dao.TravelGroupDao">
+
+    <insert id="add" parameterType="com.jzs.pojo.TravelGroup">
+        <!--在新增SQL语句之后执行select last_insert_id(), 返回int类型的值，封装到travelGroup中的id属性中
+                   或者
+                   在insert标签上增加 useGeneratedKeys="true" keyProperty="id",将生成的主键值封装到travelGroup中的id属性中
+       -->
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into t_travelgroup(code,name,helpCode,sex,remark,attention) values (#{code},#{name},#{helpCode},#{sex},#{remark},#{attention})
+    </insert>
+
+    <update id="setTravelGroupAndTravelItem" parameterType="map">
+        insert into t_travelgroup_travelitem(travelgroup_id,travelitem_id) values (#{travelGroupId},#{travelItemId})
+    </update>
+    <update id="edit" parameterType="com.jzs.pojo.TravelGroup">
+        update t_travelgroup
+        <set>
+            <if test="code!=null">code=#{code},</if>
+            <if test="name!=null">name=#{name},</if>
+            <if test="helpCode!=null">helpCode=#{helpCode},</if>
+            <if test="sex!=null">sex=#{sex},</if>
+            <if test="remark!=null">remark=#{remark},</if>
+            <if test="attention!=null">attention=#{attention}</if>
+        </set>
+        where  id=#{id}
+    </update>
+    <delete id="delete" parameterType="int">
+        delete from t_travelgroup_travelitem where travelgroup_id=#{id}
+    </delete>
+
+    <select id="findPage" resultType="com.jzs.pojo.TravelGroup" parameterType="string">
+        select * from t_travelgroup
+        <where>
+            <if test="value!=null and value.length>0">
+                code =#{value} or name like "%"#{value}"%" or helpCode=#{value}
+            </if>
+        </where>
+    </select>
+    <select id="findGroupById" resultType="com.jzs.pojo.TravelGroup" parameterType="int">
+         select * from t_travelgroup where id=#{id}
+    </select>
+    <select id="findGroupItemIds" resultType="java.lang.Integer" parameterType="int">
+        select travelitem_id from t_travelgroup_travelitem where travelgroup_id=#{id}
+    </select>
+
+    <!--List<TravelGroup> findAll();-->
+    <select id="findAll" resultType="com.jzs.pojo.TravelGroup">
+        select * from t_travelgroup
+    </select>
+
+    <!--long findCountByTravelGroupItemId(Integer id);-->
+    <select id="findCountByTravelGroupItemId" parameterType="int" resultType="long">
+        select count(*) from t_setmeal_travelgroup where travelgroup_id =#{id} limit 1
+    </select>
+
+    <!-- void deleteById(Integer id);-->
+    <delete id="deleteById" parameterType="int">
+        delete from t_travelgroup where id=#{id}
+    </delete>
+
+    <!-- void deleteGroupsById();-->
+    <delete id="deleteGroupsById" parameterType="int">
+         delete from t_travelgroup_travelitem where travelgroup_id=#{id}
+    </delete>
+
+
+
+
+    <resultMap id="findByIdResultMap" type="travelGroup">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+        <collection property="travelItems" column="id" select="com.jzs.dao.TravelItemDao.findTravelItemListById"></collection>
+    </resultMap>
+
+    <select id="findTravelGroupListById" resultMap="findByIdResultMap" parameterType="int">
+         select * from t_travelgroup where id in (select travelgroup_id from t_setmeal_travelgroup where setmeal_id=#{id})
+   </select>
+
+
+</mapper>
+
